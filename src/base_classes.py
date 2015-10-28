@@ -17,7 +17,7 @@ import sys
 import copy
 import logging
 from readfortran import Line, Comment
-from numpy.distutils.misc_util import yellow_text, red_text
+#from numpy.distutils.misc_util import yellow_text, red_text # OC deletion
 from utils import split_comma, specs_split_comma, is_int_literal_constant
 from utils import classes
 
@@ -503,7 +503,8 @@ class Statement(object):
     def torepr(self, depth=-1,incrtab=''):
         tab = incrtab + self.get_indent_tab()
         clsname = self.__class__.__name__
-        l = [tab + yellow_text(clsname)]
+        #l = [tab + yellow_text(clsname)] # OC deletion
+        l = [tab + clsname] # OC addition
         if depth==0:
             return '\n'.join(l)
         ttab = tab + '  '
@@ -575,13 +576,15 @@ class Statement(object):
     #     return
 
     def error(self, message):
-        message = self.format_message('ERROR', red_text(message))
+        #message = self.format_message('ERROR', red_text(message)) # OC deletion
+        message = self.format_message('ERROR', message) # OC addition
         logger.error(message)
         # self.show_message(message)
         return
 
     def warning(self, message):
-        message = self.format_message('WARNING', yellow_text(message))
+        #message = self.format_message('WARNING', yellow_text(message)) # OC deletion
+        message = self.format_message('WARNING', message) # OC addition
         logger.warning(message)
         # self.show_message(message)
         return

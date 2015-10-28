@@ -13,6 +13,19 @@ from oc_source import generate_source
 #                        WALK FUNCTIONS                          #
 ##################################################################
 
+
+import random
+
+def weighted_choice(items):
+    """items is a list of tuples in the form (item, weight)"""
+    weight_total = sum((item[1] for item in items))
+    n = random.uniform(0, weight_total)
+    for item, weight in items:
+        if n < weight:
+            return item
+        n = n - weight
+    return item
+
 def selectfunc_random(node, casenumseq, **kwargs):
     import random
 
@@ -24,7 +37,7 @@ def selectfunc_random(node, casenumseq, **kwargs):
     return node.cases[idx][0]
 
 def selectfunc_dtree(node, casenumseq, **kwargs):
-    import numpy
+#    import numpy
 
     # total number of edges to children nodes
     count = len(node.cases)
@@ -42,7 +55,8 @@ def selectfunc_dtree(node, casenumseq, **kwargs):
         p = [ w/wsum for w in node.dtree_weights ]
 
     # select a case based on probability distribution
-    idx = numpy.random.choice(count, p=p)
+    idx = weighted_choice(zip(range(count), p))
+#    idx = numpy.random.choice(count, p=p)
 
     # save the selection into a list
     casenumseq.append((idx, node))

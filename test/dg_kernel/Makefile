@@ -5,7 +5,7 @@ FC_FLAGS ?= -O3 -fopenmp -ffree-line-length-none
 
 OC := ../../src/opencase.py
 WORKDIR := `pwd`
-OUTDIR := ${WORKDIR}/dg_kernel
+OUTDIR := ${WORKDIR}/output
 SRC := dg_kernel.F90
 
 test:
@@ -31,4 +31,4 @@ ref_recover: ref_dg_kernel.F90
 	ln -s $< dg_kernel.F90
 
 clean:
-	rm -rf *.exe *.o *.mod
+	rm -rf *.exe *.o *.mod dg_kernel.F90 oc_casesearch_Parser_parsetab.py output perf.log opencase.log

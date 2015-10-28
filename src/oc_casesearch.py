@@ -1,5 +1,12 @@
 # oc_searchspace.py
 
+# add path to lex
+import os
+import sys
+
+script_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append('%s/../external'%script_dir)
+
 from oc_utils import TAB, _DEBUG, ProgramException
 import itertools as it
 import ply.lex as lex

@@ -1,5 +1,5 @@
-REFCASE('export OMP_NUM_THREADS=16; make clean; make ref_recover; make build FC=gfortran FC_FLAGS="-O3 -fopenmp -ffree-line-length-none"; make run')
-PRERUN('export OMP_NUM_THREADS=4';'export OMP_NUM_THREADS=8';'export OMP_NUM_THREADS=16')1
+REFCASE('export OMP_NUM_THREADS=16; make clean; make ref_recover; make build FC=gfortran FC_FLAGS="-O3 -fopenmp -ffree-line-length-none -ffree-form"; make run')
+!PRERUN('export OMP_NUM_THREADS=4';'export OMP_NUM_THREADS=8';'export OMP_NUM_THREADS=16')1
 !SRCGEN(loop_unroll: target={230}*, factor=(4;8;full)1, method=('inc';'const')1)
 !SRCGEN(loop_merge: from=(220), to=(30)*)
 !SRCGEN(loop_split: before=(250)*)

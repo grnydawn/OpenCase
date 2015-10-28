@@ -53,8 +53,8 @@
 
 
       do it=1,nit
-!$opencase SRCGEN(openmp: sentinel='!$omp', directive='parallel', clauses=('shared(flx,fly,grad)'; 'shared(flx,fly,zero,grad,delta,der,gw) private(ie,ii,i,j,k,l,s2,s1)')1 )
-!$opencase SRCGEN( openmp : sentinel='!$omp', directive='do' )*
+!!$opencase SRCGEN(openmp: sentinel='!$omp', directive='parallel', clauses=('shared(flx,fly,grad)'; 'shared(flx,fly,zero,grad,delta,der,gw) private(ie,ii,i,j,k,l,s2,s1)')1 )
+!!$opencase SRCGEN( openmp : sentinel='!$omp', directive='do' )*
 
 30       do ie=1,nelem
 40         do ii=1,npts
@@ -71,19 +71,19 @@
 150            grad(ii,ie) = s2
 160         end do
 170      end do
-!$opencase SRCGEN(openmp: sentinel=('!$omp';'!!$omp')1, directive='end do', clauses=('nowait';' ')1)
-!$opencase SRCGEN(openmp: sentinel=('!$omp';'!!$omp')1, directive='end parallel')
+!!$opencase SRCGEN(openmp: sentinel=('!$omp';'!!$omp')1, directive='end do', clauses=('nowait';' ')1)
+!!$opencase SRCGEN(openmp: sentinel=('!$omp';'!!$omp')1, directive='end parallel')
 
-!$opencase SRCGEN(openmp: sentinel=('!$omp';'!!$omp')1, directive='parallel', clauses=('shared(flx,fly,grad)';'shared(flx,fly,grad) private(ie,ii)')1)
-!$opencase SRCGEN(openmp: sentinel=('!$omp';'!!$omp')1, directive='do')
+!!$opencase SRCGEN(openmp: sentinel=('!$omp';'!!$omp')1, directive='parallel', clauses=('shared(flx,fly,grad)';'shared(flx,fly,grad) private(ie,ii)')1)
+!!$opencase SRCGEN(openmp: sentinel=('!$omp';'!!$omp')1, directive='do')
 220      do ie=1,nelem
 230         do ii=1,npts
 240            flx(ii,ie) = flx(ii,ie)+ dt*grad(ii,ie)
 250            fly(ii,ie) = fly(ii,ie)+ dt*grad(ii,ie)
 260         end do
 270      end do
-!$opencase SRCGEN(openmp: sentinel=('!$omp';'!!$omp')1, directive='end do', clauses=('nowait';' ')1)
-!$opencase SRCGEN(openmp: sentinel=('!$omp';'!!$omp')1, directive='end parallel')
+!!$opencase SRCGEN(openmp: sentinel=('!$omp';'!!$omp')1, directive='end do', clauses=('nowait';' ')1)
+!!$opencase SRCGEN(openmp: sentinel=('!$omp';'!!$omp')1, directive='end parallel')
 
       end do
 
