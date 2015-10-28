@@ -3,9 +3,9 @@
 FC ?= gfortran
 FC_FLAGS ?= -O3 -fopenmp -ffree-line-length-none
 
-OC := ${HOME}/trepo/study/opencase/src/opencase.py
+OC := ../../src/opencase.py
 WORKDIR := `pwd`
-OUTDIR := ${HOME}/trepo/temp/opencase/dg_kernel
+OUTDIR := ${WORKDIR}/dg_kernel
 SRC := dg_kernel.F90
 
 test:

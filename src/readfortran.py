@@ -80,7 +80,7 @@ import tempfile
 import traceback
 import logging
 from cStringIO import StringIO
-from numpy.distutils.misc_util import yellow_text, red_text, blue_text
+#from numpy.distutils.misc_util import yellow_text, red_text, blue_text # OC deletion
 
 from sourceinfo import get_source_info, get_source_info_str
 from splitline import String, string_replace_map, splitquote
@@ -633,7 +633,8 @@ class FortranReaderBase(object):
             # self.show_message(message, sys.stderr)
             # traceback.print_exc(file=sys.stderr)
             logger.debug(''.join(('Traceback\n',''.join( traceback.format_stack()))))
-            logger.critical(red_text('STOPPED READING'))
+            logger.critical('STOPPED READING') # OC addition
+            #logger.critical(red_text('STOPPED READING')) # OC deletion
             # self.show_message(red_text('STOPPED READING'), sys.stderr)
             raise StopIteration
 
@@ -751,7 +752,8 @@ class FortranReaderBase(object):
                 else:
                     l1 = sourceline[startcolno:endcolno]
                     l2 = sourceline[endcolno:]
-                r.append('%s%s%s <== %s' % (l0,yellow_text(l1),l2,red_text(message)))
+                #r.append('%s%s%s <== %s' % (l0,yellow_text(l1),l2,red_text(message))) # OC deletion
+                r.append('%s%s%s <== %s' % (l0,l1,l2,message)) # OC addition
             else:
                 r.append(linenostr+ self.source_lines[i-1])
         return '\n'.join(r)

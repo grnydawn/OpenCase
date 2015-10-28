@@ -184,15 +184,24 @@ def str2stmt(string, isfree=True, isstrict=False):
     return block
 
 def get_char_bit():
-    import numpy
-    one = numpy.ubyte(1)
-    two = numpy.ubyte(2)
-    n = numpy.ubyte(2)
-    i = 1
-    while n>=two:
-        n <<= one
-        i += 1
-    return i
+    # start of OC deletion
+#    import numpy
+#    one = numpy.ubyte(1)
+#    two = numpy.ubyte(2)
+#    n = numpy.ubyte(2)
+#    i = 1
+#    while n>=two:
+#        n <<= one
+#        i += 1
+#    return i
+    # end of OC deletion
+    # start of KGEN addition
+    try:
+        for i in range(16):
+            chr(1<<i)
+    except:
+        return i
+    # end of KGEN addition
 
 CHAR_BIT = get_char_bit()
 
