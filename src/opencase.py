@@ -8,7 +8,6 @@ from oc_case import Case, configure_searching, execute_refcase, execute_nextcase
 from oc_output import generate_output
 
 def main():
-
     parse_srcfiles()
     Logger.info('Source files are parsed.', stdout=True)
 

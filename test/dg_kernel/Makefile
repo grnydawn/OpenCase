@@ -8,11 +8,11 @@ WORKDIR := `pwd`
 OUTDIR := ${WORKDIR}/output
 SRC := dg_kernel.F90
 
-test:
+test: recover
 	python ${OC} \
 		--workdir ${WORKDIR} \
 		--outdir ${OUTDIR} \
-		--timeout 2m \
+		--timeout 10m \
 		--debug logging.select.name=grad_term_gpu.nelem \
 		${SRC}
 
@@ -24,11 +24,12 @@ build: dg_kernel.F90
 
 recover: dg_kernel.F90.oc_org
 	rm -f dg_kernel.F90
-	ln -s $< dg_kernel.F90
+	cp -f $< dg_kernel.F90
+	#ln -s $< dg_kernel.F90
 
 ref_recover: ref_dg_kernel.F90
 	rm -f dg_kernel.F90
 	ln -s $< dg_kernel.F90
 
 clean:
-	rm -rf *.exe *.o *.mod dg_kernel.F90 oc_casesearch_Parser_parsetab.py output perf.log opencase.log
+	rm -rf *.exe *.o *.mod
