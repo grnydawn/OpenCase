@@ -12,7 +12,7 @@ def directive(inputfile, target_stmt, label, sentinel, directive, span):
     for stmt, depth in walk(inputfile.tree, -1):
         if stmt.item.span==span:
             new_target_stmt = stmt
-            line = '%s %s'%(SrcFile.applymap(sentinel[0]), SrcFile.applymap(directive[0]))
+            line = '!%s$ %s'%(SrcFile.applymap(sentinel[0]), SrcFile.applymap(directive[0]))
             break
 
     if line:

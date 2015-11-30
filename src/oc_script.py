@@ -15,7 +15,7 @@ def generate_script(casenum, directs, srcfileids):
             if key.lower().startswith(direct):
                 exec('%s.extend(value[0])'%direct)
 
-    script_file = Config.path['outdir']+'/case_'+str(casenum)+'.sh'
+    script_file = Config.path['workdir']+'/case_'+str(casenum)+'.sh'
     fscr = open(script_file, 'w+')
 
     # start of script
@@ -36,16 +36,16 @@ def generate_script(casenum, directs, srcfileids):
             fscr.write(SrcFile.applymap(cmd)+'\n')
 
     # create symlink
-    fscr.write('\n')
-    fscr.write('# symlink\n')
-    for i, inputfile in enumerate(State.inputfile):
-        #fscr.write('rm -f %s\n'%inputfile.filename)
-        fscr.write('rm -f %s\n'%inputfile.abspath)
-        if i in srcfileids:
-            outpath = os.path.join(Config.path['outdir'], case_filename(inputfile.filename, casenum))
-            fscr.write('ln -s %s %s\n'%(outpath, inputfile.filename))
-        else:
-            fscr.write('ln -s %s.oc_org %s\n'%(inputfile.filename, inputfile.filename))
+#    fscr.write('\n')
+#    fscr.write('# symlink\n')
+#    for i, inputfile in enumerate(State.inputfile):
+#        #fscr.write('rm -f %s\n'%inputfile.filename)
+#        fscr.write('rm -f %s\n'%inputfile.abspath)
+#        if i in srcfileids:
+#            outpath = os.path.join(Config.path['outdir'], case_filename(inputfile.filename, casenum))
+#            fscr.write('ln -s %s %s\n'%(outpath, inputfile.filename))
+#        else:
+#            fscr.write('ln -s %s.oc_org %s\n'%(inputfile.filename, inputfile.filename))
 
     # clean
     fscr.write('\n')

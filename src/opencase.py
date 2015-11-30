@@ -1,6 +1,6 @@
 from os import chdir
 from time import time
-from shutil import copyfile
+from shutil import copyfile, copytree
 from oc_utils import Logger, Config, Timeout, UserException, ProgramException, TimeoutException
 from oc_state import State
 from oc_parse import parse_srcfiles
@@ -13,6 +13,8 @@ def main():
 
     configure_searching()
     Logger.info('Searching is configured.', stdout=True)
+
+    copytree(Config.path['refdir'], Config.path['workdir'])
 
     execute_refcase()
     Logger.info('Reference case is executed.', stdout=True)

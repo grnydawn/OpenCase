@@ -72,6 +72,7 @@ class SrcFile(object):
         self.srcpath = srcpath
         self.filename = os.path.basename(self.srcpath)
         self.abspath = os.path.abspath(self.srcpath)
+        self.relpath = os.path.relpath(self.abspath, Config.path['refdir'])
         self.searchtree = []
         self.direct = {}
 

@@ -46,8 +46,8 @@ def generate_source(casenum, srcgens):
                 transform_source(gentype[0], attrs, State.inputfile[inputfileid], stmt, span)
 
     for srcfileid in srcfileids:
-        filename = case_filename(State.inputfile[srcfileid].filename, casenum)
-        State.inputfile[srcfileid].write_to_file(Config.path['outdir']+'/'+filename)
+        #relpath = case_filename(State.inputfile[srcfileid].relpath, casenum)
+        State.inputfile[srcfileid].write_to_file(Config.path['workdir']+'/'+State.inputfile[srcfileid].relpath)
 
     return srcfileids
 

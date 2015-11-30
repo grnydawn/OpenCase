@@ -1,3 +1,4 @@
+!$opencase include(cases.inc)
 
 ! KGEN-generated Fortran source file
 !
@@ -597,6 +598,9 @@
             INTEGER :: nstep
             !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
             ! default return error message
+
+!$opencase SRCGEN(directive: label=100, sentinel=DIR, directive=("assume_allined dumni:8";"assume_allined dumni:16")*1)
+
   errstring = ' '
   if (.not. (do_cldice .or. &
        (associated(tnd_qsnow) .and. associated(tnd_nsnow) .and. associated(re_ice)))) then

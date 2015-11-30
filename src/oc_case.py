@@ -2,6 +2,7 @@
 
 import re
 import time
+import shutil
 from oc_algorithm import select_nextcasenum
 from oc_utils import exec_cmd, findall, Logger, ProgramException, Config
 from oc_state import State
@@ -143,7 +144,7 @@ class Case(object):
             # execute refcase
             stdout = []
             cmd = State.direct['refcase'][0][0].cases[0][0][0].case[0][0][0]
-            refcmd = SrcFile.applymap(cmd) 
+            refcmd = 'cd %s; '%Config.path['refdir'] + SrcFile.applymap(cmd) 
             for j in range(self.ref_outer_iter):
                 for i in range(self.ref_inner_iter):
                     stdout.append(exec_cmd(refcmd))
@@ -156,9 +157,16 @@ class Case(object):
             # transform source
             srcgen = [ value for key, value in self.directs.iteritems() if key.lower().startswith('srcgen') ]
             srcfiles = generate_source(self.casenum, srcgen)
+            for fileid in srcfiles:
+                src = '%s/%s'%(Config.path['workdir'], State.inputfile[fileid].relpath)
+                dst = '%s/%s.%d'%(Config.path['outdir'], State.inputfile[fileid].relpath, self.casenum)
+                shutil.copyfile(src, dst)
 
             # generate shell script
             script = generate_script(self.casenum, self.directs, srcfiles)
+            src = '%s/case_%d.sh'%(Config.path['workdir'],self.casenum)
+            dst = '%s/case_%d.sh'%(Config.path['outdir'],self.casenum)
+            shutil.copyfile(src, dst)
 
             # execute shell script
             output = exec_cmd(script)
@@ -334,7 +342,7 @@ def execute_nextcase():
     case_mgr.rank(nextcase)
 
     # return False to finish
-    with open(Config.path['perf'], 'wb') as f:
+    with open(Config.path['outdir']+'/perf.log', 'wb') as f:
         if case_mgr:
             if case_mgr.refcase.result==Case.VERIFIED:
                 refperfvals = [ float(val) for val in case_mgr.refcase.measured[case_mgr.rank_var] ]

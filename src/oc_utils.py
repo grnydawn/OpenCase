@@ -5,7 +5,7 @@ import os
 import re
 import sys
 import signal
-from shutil import copyfile
+from shutil import copyfile, rmtree
 from Fortran2003 import Name, Data_Ref
 
 # Put src folder first in path
@@ -247,9 +247,9 @@ class Config(object):
 
         # path parameters
         self._attrs['path'] = {}
-        self._attrs['path']['workdir'] = '.'
-        self._attrs['path']['outdir'] = '.'
-        self._attrs['path']['perf'] = 'perf.log'
+        self._attrs['path']['workdir'] = './work'
+        self._attrs['path']['outdir'] = './output'
+        self._attrs['path']['refdir'] = './ref'
 
         # include parameters
         self._attrs['include'] = {}
@@ -274,6 +274,7 @@ class Config(object):
         parser.add_option("--srcdir", dest="srcdir", action='store', type='string', help="specifiying path to source directory")
         parser.add_option("--outdir", dest="outdir", action='store', type='string', default=None, help="path to create outputs")
         parser.add_option("--workdir", dest="workdir", action='store', type='string', default=None, help="path to working dir")
+        parser.add_option("--refdir", dest="refdir", action='store', type='string', default=None, help="path to reference dir")
         parser.add_option("--skip-intrinsic", dest="skip_intrinsic", action='append', type='string', default=None, help="Skip intrinsic procedures during searching")
         parser.add_option("--noskip-intrinsic", dest="noskip_intrinsic", action='append', type='string', default=None, help="Do not skip intrinsic procedures during searching")
         parser.add_option("--timeout", dest="timeout", action='store', type='string', default=None, help="Timeout to exit")
@@ -290,11 +291,11 @@ class Config(object):
                 print 'ERROR: %s can not be found.' % inputfile
                 sys.exit(-1)
             self._attrs['inputfile'].append(os.path.abspath(inputfile))
-            if os.path.exists(inputfile + '.oc_org'):
-                os.remove(inputfile)
-                copyfile(inputfile + '.oc_org', inputfile)
-            else:
-                copyfile(inputfile, inputfile + '.oc_org')
+            #if os.path.exists(inputfile + '.oc_org'):
+            #    os.remove(inputfile)
+            #    copyfile(inputfile + '.oc_org', inputfile)
+            #else:
+            #    copyfile(inputfile, inputfile + '.oc_org')
 
         # check if exists fpp or cpp
         output = ''
@@ -362,13 +363,20 @@ class Config(object):
 
         if opts.outdir:
             self._attrs['path']['outdir'] = opts.outdir
+        # create state directories and change working directory
+        if os.path.exists(self._attrs['path']['outdir']):
+            map( os.unlink, [os.path.join(opts.outdir ,f) for f in os.listdir(opts.outdir)] ) 
+        else:
+            os.makedirs(self._attrs['path']['outdir'])
 
         if opts.workdir:
             self._attrs['path']['workdir'] = opts.workdir
-
         # create state directories and change working directory
-        if not os.path.exists(self._attrs['path']['outdir']):
-            os.makedirs(self._attrs['path']['outdir'])
+        if os.path.exists(self._attrs['path']['workdir']):
+            rmtree(self._attrs['path']['workdir'])
+
+        if opts.refdir:
+            self._attrs['path']['refdir'] = opts.refdir
 
         # support only a single directory 
         if opts.srcdir and os.path.exists(opts.srcdir):

@@ -47,7 +47,7 @@ def generate_output():
     # what are the common features of the quality cases
 
     # write ranking into a file
-    with open(Config.path['perf'], 'wb') as f:
+    with open(Config.path['outdir']+'/perf.log', 'wb') as f:
         mgr = State.cases['mgr']
         if mgr:
             if mgr.refcase.result==Case.VERIFIED:
