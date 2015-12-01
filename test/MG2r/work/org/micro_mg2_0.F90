@@ -599,7 +599,7 @@
             !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
             ! default return error message
 
-!$opencase SRCGEN(directive: label=100, sentinel=DIR, directive=("assume_allined dumni:8";"assume_allined dumni:16")*1)
+!!!$opencase SRCGEN(directive: label=100, sentinel=DIR, directive=("assume_allined dumni:8";"assume_allined dumni:16")*1)
 
   errstring = ' '
   if (.not. (do_cldice .or. &
