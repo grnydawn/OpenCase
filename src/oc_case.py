@@ -120,8 +120,8 @@ casegen_functions_dtree = (selectfunc_dtree, prefunc_pass, postfunc_pass, update
 class Case(object):
     NOT_INTIALIZED, REFCASE = range(-1, -3, -1)
     VERIFIED, GENERIC_FAIL, EXECUTION_FAIL, MEASURMENT_FAIL, VERIFICATION_FAIL = range(0, -5, -1)
-    ref_outer_iter = 1 # 2
-    ref_inner_iter = 1 # 3
+    ref_outer_iter = 2
+    ref_inner_iter = 1
 
     def __init__(self, parent, casenum, caseorder=None , directs=None, objs=None, caseidxseq=None):
         self.parent = parent
@@ -356,6 +356,6 @@ def execute_nextcase():
                 f.write('%d\t\t%d\t\t%d\t\t%e\n'%((i+1,)+rank))
 
             for i, failed in enumerate(case_mgr.failed):
-                f.write('%d\t\t%d\t\t%d\t\t%e\n'%((i+1,)+failed))
+                f.write('%d\t\t%d\t\t%d\t\t%e\n'%((-1,)+failed))
  
     return True

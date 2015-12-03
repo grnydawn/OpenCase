@@ -62,6 +62,6 @@ def generate_output():
                 f.write('%d\t\t%d\t\t%d\t\t%e\n'%((i+1,)+rank))
 
             for i, failed in enumerate(mgr.failed):
-                f.write('%d\t\t%d\t\t%d\t\t%e\n'%((i+1,)+failed))
+                f.write('%d\t\t%d\t\t%d\t\t%e\n'%((-1,)+failed))
 
     Logger.info('', stdout=True)

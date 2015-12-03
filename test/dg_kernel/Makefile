@@ -4,32 +4,15 @@ FC ?= gfortran
 FC_FLAGS ?= -O3 -fopenmp -ffree-line-length-none
 
 OC := ../../src/opencase.py
-WORKDIR := `pwd`
-OUTDIR := ${WORKDIR}/output
+PWD := $(shell pwd)
+WORKDIR := ${PWD}/work
+OUTDIR := ${PWD}/output
 SRC := dg_kernel.F90
 
-test: recover
+test: 
 	python ${OC} \
 		--workdir ${WORKDIR} \
 		--outdir ${OUTDIR} \
 		--timeout 10m \
 		--debug logging.select.name=grad_term_gpu.nelem \
 		${SRC}
-
-run:
-	./dg_kernel.exe
-
-build: dg_kernel.F90
-	@${FC} ${FC_FLAGS} -o dg_kernel.exe $<
-
-recover: dg_kernel.F90.oc_org
-	rm -f dg_kernel.F90
-	cp -f $< dg_kernel.F90
-	#ln -s $< dg_kernel.F90
-
-ref_recover: ref_dg_kernel.F90
-	rm -f dg_kernel.F90
-	ln -s $< dg_kernel.F90
-
-clean:
-	rm -rf *.exe *.o *.mod

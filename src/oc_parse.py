@@ -300,6 +300,7 @@ def get_directs(selectfunc, prefunc, postfunc, **kwargs):
 
     casenum = 0
     cursize = 1
+
     for idx, node in casenumseq:
         casenum += cursize*idx
         cursize *= len(node.cases)
