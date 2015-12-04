@@ -3,6 +3,7 @@
 import re
 import time
 import shutil
+import math
 from oc_algorithm import select_nextcasenum
 from oc_utils import exec_cmd, findall, Logger, ProgramException, Config
 from oc_state import State
@@ -10,6 +11,12 @@ from oc_parse import get_directs, SrcFile
 from oc_script import generate_script
 from oc_source import generate_source
     
+from pybrain.tools.shortcuts import buildNetwork
+from pybrain.datasets import SupervisedDataSet
+from pybrain.supervised.trainers import BackpropTrainer
+from pybrain.structure import TanhLayer
+
+
 ##################################################################
 #                        WALK FUNCTIONS                          #
 ##################################################################
@@ -123,13 +130,14 @@ class Case(object):
     ref_outer_iter = 2
     ref_inner_iter = 1
 
-    def __init__(self, parent, casenum, caseorder=None , directs=None, objs=None, caseidxseq=None):
+    def __init__(self, parent, casenum, caseorder=None , directs=None, objs=None, caseidxseq=None, predict=None):
         self.parent = parent
         self.casenum = casenum
         self.caseorder = caseorder
         self.directs = directs
         self.objs = objs
         self.caseidxseq = caseidxseq
+        self.predict = predict
 
         self.result = Case.GENERIC_FAIL
 
@@ -268,6 +276,54 @@ class Cases(object):
         self.rank_var = State.direct['rank'][0][0].cases[0][0][0].case[0][0][0]
         self.rank_attrs = State.direct['rank'][0][0].cases[0][0][0].case[0][1]
 
+        # build Neural Network
+        casenum, casenumseq, directs, objs = get_directs( self.selectfunc, self.prefunc, self.postfunc)
+
+        self.casesizes = []
+        for caseidx, caseobj in casenumseq:
+            self.casesizes.append(max(1, int(math.ceil(math.log(caseobj.size, 2)))))
+        self.NN_input_size = sum(self.casesizes)
+        self.NN_hidden_layers = 3
+        self.NN_target_size = 1
+
+        self.NN_net = buildNetwork( self.NN_input_size, self.NN_hidden_layers, self.NN_target_size, bias = True )
+        self.NN_trainer = BackpropTrainer(self.NN_net, momentum=0.1, weightdecay=0.01, learningrate=0.01)
+        self.NN_ds = SupervisedDataSet( self.NN_input_size, self.NN_target_size )
+
+        self.NN_basket_size = 100
+        self.NN_min_dataset_size = min(10, State.cases['size'])
+        self.NN_amp_factor = 1.0
+
+    def gen_NN_input(self, caseseq):
+        NN_input = []
+        for casesize, (idx, obj) in zip(self.casesizes, caseseq):
+            q = idx
+            for i in range(casesize):
+                r = q%2
+                q /= 2
+                NN_input.append(r)
+        assert len(NN_input)==self.NN_input_size, 'NN input size mismatch'
+            
+        return NN_input
+
+    def NN_get_nextcase(self, NNcases):
+        ds_e = SupervisedDataSet( self.NN_input_size, self.NN_target_size )
+        nextcase = NNcases[0]
+        evalue = None
+        for NNcase in NNcases:
+            ds_e.appendLinked( self.gen_NN_input(NNcase[1]), None )
+            e = self.NN_net.activateOnDataset( ds_e )[0][0]
+            if evalue is None: evalue = e
+            if self.rank_attrs['sort'].lower()=='ascend':
+                if e<evalue:
+                    evalue = e
+                    nextcase = NNcase
+            elif self.rank_attrs['sort'].lower()=='descend':
+                if e>evalue:
+                    evalue = e
+                    nextcase = NNcase
+        return nextcase + (evalue, )
+
     def get_refcase(self):
         # construct refcase
         self.refcase = Case( self, casenum=Case.REFCASE )
@@ -276,14 +332,23 @@ class Cases(object):
 
     def get_nextcase(self):
         # construct directives
-        casenum = -1
-        while casenum==-1 or len(self.casenums)>=State.cases['size']:
+        NNcases = []
+        while len(self.casenums)<State.cases['size']:
             casenum, casenumseq, directs, objs = get_directs( self.selectfunc, self.prefunc, self.postfunc)
-            if casenum in self.casenums:
-                casenum = -1
+            predict = None
 
+            if casenum in self.casenums or casenum in NNcases:
+                continue
+            elif len(self.casenums)<self.NN_min_dataset_size or len(self.ranking)==0:
+                break
+            else:
+                NNcases.append((casenum, casenumseq, directs, objs))
+                if len(NNcases)<self.NN_basket_size: continue
+                casenum, casenumseq, directs, objs, predict = self.NN_get_nextcase(NNcases)
+                break
+        
         self.casenums.append(casenum)
-        return Case( self, casenum=casenum, caseorder=len(self.casenums), directs=directs, caseidxseq=casenumseq, objs=objs )
+        return Case( self, casenum=casenum, caseorder=len(self.casenums), directs=directs, caseidxseq=casenumseq, objs=objs, predict=predict )
 
     def rank(self, case):
         if case.result==Case.VERIFIED:
@@ -291,7 +356,10 @@ class Cases(object):
             perfval = sum(perfvals)/len(perfvals)
             result_triple = (case.casenum, case.caseorder, perfval)
 
-            print 'SUCCESS: ', result_triple
+            if case.predict:
+                print 'SUCCESS: ', result_triple, 'predicted: %f'%case.predict
+            else:
+                print 'SUCCESS: ', result_triple
 
             self.ranking.append(result_triple)
             if self.rank_attrs.has_key('sort'):
@@ -303,11 +371,28 @@ class Cases(object):
                 self.ranking.sort(key=lambda c: c[2], reverse=False)
 
             self.updatefunc(case, self.ranking.index(result_triple), len(self.ranking), len(self.failed))
+
+            # train NN
+            self.NN_ds.appendLinked( self.gen_NN_input(case.caseidxseq), perfval )
+            self.NN_trainer.trainOnDataset(self.NN_ds)
         else:
-            print 'FAILED: ', (case.casenum, case.caseorder, case.result)
+            if case.predict:
+                print 'FAILED: ', (case.casenum, case.caseorder, case.result), 'predicted: %f'%case.predict
+            else:
+                print 'FAILED: ', (case.casenum, case.caseorder, case.result)
 
             self.failed.append((case.casenum, case.caseorder, case.result))
             self.updatefunc(case, case.result, len(self.ranking), len(self.failed))
+
+            # train NN
+            #VERIFIED, GENERIC_FAIL, EXECUTION_FAIL, MEASURMENT_FAIL, VERIFICATION_FAIL = range(0, -5, -1)
+            if len(self.ranking)>0:
+                if self.rank_attrs['sort'].lower()=='descend':
+                    self.NN_ds.appendLinked( self.gen_NN_input(case.caseidxseq), self.ranking[-1][2]/self.NN_amp_factor )
+                elif self.rank_attrs['sort'].lower()=='ascend':
+                    self.NN_ds.appendLinked( self.gen_NN_input(case.caseidxseq), self.ranking[-1][2]*self.NN_amp_factor)
+                else: raise UserException('Sorting is neither descend or ascend')
+                self.NN_trainer.trainOnDataset(self.NN_ds)
 
 ##################################################################
 #                     INTERFACE FUNCTIONS                        #
