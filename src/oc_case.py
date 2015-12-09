@@ -283,15 +283,15 @@ class Cases(object):
         for caseidx, caseobj in casenumseq:
             self.casesizes.append(max(1, int(math.ceil(math.log(caseobj.size, 2)))))
         self.NN_input_size = sum(self.casesizes)
-        self.NN_hidden_layers = 3
+        self.NN_hidden_layers = 4
         self.NN_target_size = 1
 
         self.NN_net = buildNetwork( self.NN_input_size, self.NN_hidden_layers, self.NN_target_size, bias = True )
         self.NN_trainer = BackpropTrainer(self.NN_net, momentum=0.1, weightdecay=0.01, learningrate=0.01)
         self.NN_ds = SupervisedDataSet( self.NN_input_size, self.NN_target_size )
 
-        self.NN_basket_size = 100
-        self.NN_min_dataset_size = min(10, State.cases['size'])
+        self.NN_basket_size = 1000
+        self.NN_min_dataset_size = min(20, State.cases['size'])
         self.NN_amp_factor = 1.0
 
     def gen_NN_input(self, caseseq):
@@ -346,6 +346,9 @@ class Cases(object):
                 if len(NNcases)<self.NN_basket_size: continue
                 casenum, casenumseq, directs, objs, predict = self.NN_get_nextcase(NNcases)
                 break
+       
+            if casenum in self.casenums: continue
+            break
         
         self.casenums.append(casenum)
         return Case( self, casenum=casenum, caseorder=len(self.casenums), directs=directs, caseidxseq=casenumseq, objs=objs, predict=predict )
@@ -393,7 +396,7 @@ class Cases(object):
                     self.NN_ds.appendLinked( self.gen_NN_input(case.caseidxseq), self.ranking[-1][2]*self.NN_amp_factor)
                 else: raise UserException('Sorting is neither descend or ascend')
                 self.NN_trainer.trainOnDataset(self.NN_ds)
-
+#
 ##################################################################
 #                     INTERFACE FUNCTIONS                        #
 ##################################################################
